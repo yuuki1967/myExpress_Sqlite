@@ -3,7 +3,13 @@ var express = require('express');
 http = require('http');
 var app = express();
 
-var bodyParser = require('body-parser')
+var RateLimit = require('express-rate-limit');
+var limiter = RateLimit({
+  windowMs: 1*60*1000, // 1minute
+  max: 5
+});
+
+var bodyParser = require('body-parser');
 
 const sql = require("sqlite3");
 const db = new sql.Database("./test.db", (err) => {
@@ -32,6 +38,8 @@ const db = new sql.Database("./test.db", (err) => {
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
+app.use(limiter);
 
 app.use(bodyParser.json());
 app.post('/students', (req, res) =>{

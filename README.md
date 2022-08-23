@@ -1,4 +1,4 @@
-# myExpressApp2
+# myExpressApp_Sqlite
 ## For checking CodeQ
 ## How to setup
 - npm init -y
