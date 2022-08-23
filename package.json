@@ -11,11 +11,25 @@
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
-    "mongodb": "^4.3.1",
     "morgan": "~1.9.1",
     "mssql": "^8.0.1",
     "pug": "2.0.0-beta11",
+    "sqlite3": "^5.0.11",
     "xmldom": "^0.6.0",
     "xpath": "0.0.32"
-  }
+  },
+  "description": "- node init -y - node install express - node install sqlite3 - node app.js",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuuki1967/myExpressApp2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuuki1967/myExpressApp2/issues"
+  },
+  "homepage": "https://github.com/yuuki1967/myExpressApp2#readme",
+  "devDependencies": {}
 }

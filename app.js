@@ -1,70 +1,60 @@
 var createError = require('http-errors');
 var express = require('express');
-var sql = require("mssql");
 http = require('http');
-//Commented out 1 2
-xpath = require('xpath');
-dom = require('xmldom').DOMParser;
-fs = require('fs');
-xml = fs.readFileSync('test.xml',"utf-8");
-doc = new dom().parseFromString(xml);
-select = xpath.useNamespaces({
-  "a": "http://example.com/XMLSchema"
-});
-
-city = select("/a:School/a:Address/a:City/text()",
-doc, true);
-
-if(city){
-  console.log(city.nodeValue);
-}
-
 var app = express();
 
 var bodyParser = require('body-parser')
 
+const sql = require("sqlite3");
+const db = new sql.Database("./test.db", (err) => {
+  if(err){
+    console.error("Database error: " + err.message);
+  } else {
+    db.serialize(() => {
+      db.run("drop table if exists members");
+      db.run("create table if not exists members( \
+        id integer primary key autoincrement, \
+	name nverchar(32), \
+	pwd  nverchar(32) \
+      )" , (err) => {
+	if (err) {
+	  console.error("table error: "+ err.message);
+	} else {
+	  db.run("insert into members(name, pwd) values(?, ?)", "Mike", "password1");
+	  db.run("insert into members(name, pwd) values(?, ?)", "Hanako", "password2");
+	  db.run("insert into members(name, pwd) values(?, ?)", "Tony", "password3");
+        }
+      });
+    });
+  }
+});
+
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
 app.use(bodyParser.json());
-app.post('/student/', (req, res) =>{
+app.post('/students', (req, res) =>{
   console.log(req.body);
   res.send("Received POST Data");
 });
 
-app.get('/:name', function(req, res) {
-
-  //config for the database
-  var config = {
-    server: 'localhost',
-    authentication:{
-      type: 'default',
-      options:{
-        userName: 'sa',
-        password: 'Checkmarx\!123'
-      }
-    },
-    options:{ 
-      database: 'demo'
+app.get('/:name/:pwd', function(req, res) {
+  const name = req.params.name;
+  const pwd = req.params.pwd;
+  db.get("select * from members where name = ? AND pwd = ?", name, pwd, (err, row) => {
+    if (err) {
+      res.status(400).json({
+        "status": "error",
+	"message": err.message
+      });
+      return;
+    } else {
+      res.status(200).json({
+        "status": "OK",
+	"members": row 
+      });
     }
-  };
-
-  //connect to the database 'demo'
-  sql.connect('Server=localhost,1433;Database=demo;User Id=sa;Password=Checkmarx!123;Trust_Connection=True;TrustServerCertificate=True', function(err) {
-    if (err) console.log(err);
-
-    //create Request object
-    var request = new sql.Request();
-
-    // query to the database and get the records
-    var name=req.params.name,
-      id=2,
-      sqlQueryString="select * from dbo.students where (standardId='"+id+"' AND studentName='"+name+"')"; // SQL injection 
-    request.query(sqlQueryString, function (err, recordset){
-      if (err) console.log(err)
-        // send records as a response
-        res.send(recordset);
-    });
   });
 });
 
